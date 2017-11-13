@@ -9,14 +9,17 @@ operators = [
                 ("/", (/))
             ]            
             
-calculate :: String -> Maybe  Double
+calculate :: String -> Maybe Double
 calculate = parseStep operators . words          
 parseStep :: Register -> [String] -> Maybe Double
-parseStep _ [number] = read number
+parseStep [] _ = Nothing 
+parseStep _ [] = Nothing 
+parseStep _ [number] = Just $ read number
 parseStep ((operator, function):xs) unparsed =
     case span (/=operator) unparsed of
         (_, []) -> parseStep xs unparsed
-        (beforeOperator, afterOperator) -> 
+        ([], _) -> Nothing
+        (partBefore, partAfter) -> 
             function
-                <$> (parseStep operators beforeOperator)
-                <*> (parseStep operators $ drop 1 afterOperator)
+                <$> (parseStep operators partBefore)
+                <*> (parseStep operators $ drop 1 partAfter)
