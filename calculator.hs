@@ -25,4 +25,4 @@ parseStep ((operator, function):xs) unparsed =
                 <*> (parseStep operators $ drop 1 partAfter)
                 
                 
-                --Example: calculate "2 + 2 * 2"  -->Just 6
+                --Example: calculate "2 + 2 * 2"  --> Just 6
