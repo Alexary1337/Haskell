@@ -18,7 +18,7 @@ executeCommand ('d':'e':'l':' ':num ) todos =
             getCommand todos
         Just todos' -> getCommand todos'
 executeCommand ('s':'o':'r':'t':' ':way ) todos =
-    case sortTODOs (read way) todos of
+    case sortTODOs way todos of
         Nothing -> do
             putStrLn "incorrect"
             getCommand todos
@@ -26,9 +26,9 @@ executeCommand ('s':'o':'r':'t':' ':way ) todos =
 executeCommand "view" todos = view todos
 executeCommand "q" todos = return ()
 executeCommand "help" todos = help()
---executeCommand [] todos = return ()
 executeCommand  command todos = do
     putStrLn ("Invalid command: `" ++ command ++ "`")
+    putStrLn ("Type 'help' for available commands.")
     getCommand todos
 
 deleteTODO :: Int -> [a] -> Maybe [a]
@@ -38,12 +38,13 @@ deleteTODO n (a:as) = do
     return (a:as')
 deleteTODO _  [] = Nothing
 
---sortTODOs :: Char -> [a] -> Maybe [a]
-sortTODOs 'a' (a:as) = Just (quicksort (a:as))
-sortTODOs 'd' (a:as) = Just $ reverse $ quicksort (a:as)
+sortTODOs :: String -> [String] -> Maybe [String]
+sortTODOs "-a" (a:as) = Just (quicksort (a:as))
+sortTODOs "-d" (a:as) = Just $ reverse $ quicksort (a:as)
 sortTODOs _ (a:as) = Nothing
+sortTODOs _ [] = Nothing
 
-quicksort :: Ord a => [a] -> [a]
+quicksort :: [String] -> [String]
 quicksort []     = []
 quicksort (p:xs) = (quicksort lesser) ++ [p] ++ (quicksort greater)
     where
@@ -74,3 +75,21 @@ help () = do
 
 main = do
     help()
+    
+
+--functions for read/write file. Not used in current version, because app tested only in repl.it environment
+readList :: [String] -> String -> IO ()
+readList _ path = do 
+                    list <- readFile path
+                    view (wordsWhen ('\n'==) list)
+
+saveList :: FilePath -> [String] -> IO ()
+saveList path list = do writeFile path (unlines list)
+
+--separate whole string into many strings divided by char parameter ('\n' in my case)
+wordsWhen :: (Char -> Bool) -> String -> [String]
+wordsWhen p s =  case dropWhile p s of
+                      "" -> []
+                      s' -> w : wordsWhen p s''
+                        where (w, s'') = break p s'
+    
